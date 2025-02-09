@@ -1,0 +1,147 @@
+#include <iostream>
+#include <vector>
+#include <windows.h>
+#include <conio.h>
+
+using namespace std;
+
+const int WIDTH = 40, HEIGHT = 20;
+int highScore = 0;
+
+class SnakeGame {
+private:
+    vector<pair<int, int>> snake;
+    pair<int, int> food;
+    int direction;
+    bool gameOver;
+    int score;
+    bool gameStarted;
+
+public:
+    SnakeGame() {
+        resetGame();
+    }
+
+    void resetGame() {
+        snake.clear();
+        snake.push_back({WIDTH / 2, HEIGHT / 2});
+        spawnFood();
+        direction = 0;
+        gameOver = false;
+        score = 0;
+        gameStarted = false;
+    }
+
+    void spawnFood() {
+        food.first = rand() % (WIDTH - 2) + 1;
+        food.second = rand() % (HEIGHT - 2) + 1;
+    }
+
+    void draw() {
+        COORD coord = {0, 0};
+        SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+        
+        for (int y = 0; y < HEIGHT; y++) {
+            for (int x = 0; x < WIDTH; x++) {
+                if (x == 0 || x == WIDTH - 1 || y == 0 || y == HEIGHT - 1) {
+                    cout << "#";
+                } else if (x == food.first && y == food.second) {
+                    cout << "F";
+                } else {
+                    bool printed = false;
+                    for (auto &s : snake) {
+                        if (s.first == x && s.second == y) {
+                            cout << "O";
+                            printed = true;
+                            break;
+                        }
+                    }
+                    if (!printed) cout << " ";
+                }
+            }
+            cout << "\n";
+        }
+        cout << "Score: " << score * 10 << "  High Score: " << highScore * 10 << "\n";
+        if (!gameStarted) cout << "Press Arrow Keys to start moving!" << endl;
+    }
+
+    void handleInput() {
+        if (_kbhit()) {
+            int key = _getch();
+            if (key == 224) {
+                key = _getch();
+                if ((key == 72 && direction != 2) || 
+                    (key == 80 && direction != 1) || 
+                    (key == 75 && direction != 4) || 
+                    (key == 77 && direction != 3)) {
+                    direction = (key == 72) ? 1 : (key == 80) ? 2 : (key == 75) ? 3 : 4;
+                    gameStarted = true;
+                }
+            }
+        }
+    }
+
+    void updateLogic() {
+        if (!gameStarted) return;
+        
+        pair<int, int> newHead = snake.front();
+        if (direction == 1) newHead.second--;
+        else if (direction == 2) newHead.second++;
+        else if (direction == 3) newHead.first--;
+        else if (direction == 4) newHead.first++;
+        
+        if (newHead.first == 0 || newHead.first == WIDTH - 1 || 
+            newHead.second == 0 || newHead.second == HEIGHT - 1) {
+            gameOver = true;
+            return;
+        }
+
+        for (auto &s : snake) {
+            if (s == newHead) {
+                gameOver = true;
+                return;
+            }
+        }
+
+        snake.insert(snake.begin(), newHead);
+        if (newHead == food) {
+            spawnFood();
+            score++;
+            if (score > highScore) {
+                highScore = score;
+            }
+        } else {
+            snake.pop_back();
+        }
+    }
+
+    bool isGameOver() {
+        return gameOver;
+    }
+};
+
+void hideCursor() {
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_CURSOR_INFO cursorInfo;
+    GetConsoleCursorInfo(hOut, &cursorInfo);
+    cursorInfo.bVisible = false;
+    SetConsoleCursorInfo(hOut, &cursorInfo);
+}
+
+int main() {
+    hideCursor();
+    
+    while (true) {
+        SnakeGame game;
+        while (!game.isGameOver()) {
+            game.draw();
+            game.handleInput();
+            game.updateLogic();
+            Sleep(100);
+        }
+        cout << "Game Over! Press R to restart or Q to exit." << endl;
+        char choice = _getch();
+        if (choice == 'q') break;
+    }
+    return 0;
+}

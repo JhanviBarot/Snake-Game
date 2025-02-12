@@ -37,10 +37,10 @@ public:
             food.first = rand() % (WIDTH - 2) + 1;
             food.second = rand() % (HEIGHT - 2) + 1;
     
-            bool collision = false;
-            for (const auto& segment : snake) {
-                if (segment == food) {
-                    collision = true;
+            bool coincide = false;
+            for (const auto& s : snake) {
+                if (s == food) {
+                    coincide = true;
                     break;
                 }
             }

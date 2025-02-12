@@ -32,9 +32,21 @@ public:
         gameStarted = false;
     }
 
-    void spawnFood() {
-        food.first = rand() % (WIDTH - 2) + 1;
-        food.second = rand() % (HEIGHT - 2) + 1;
+   void spawnFood() {
+        while (true) {
+            food.first = rand() % (WIDTH - 2) + 1;
+            food.second = rand() % (HEIGHT - 2) + 1;
+    
+            bool collision = false;
+            for (const auto& segment : snake) {
+                if (segment == food) {
+                    collision = true;
+                    break;
+                }
+            }
+    
+            if (!collision) break;
+        }
     }
 
     void draw() {

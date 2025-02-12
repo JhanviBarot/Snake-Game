@@ -38,7 +38,7 @@ public:
             food.second = rand() % (HEIGHT - 2) + 1;
     
             bool coincide = false;
-            for (const auto& s : snake) {
+            for (auto& s : snake) {
                 if (s == food) {
                     coincide = true;
                     break;

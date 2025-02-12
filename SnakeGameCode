@@ -5,7 +5,7 @@
 
 using namespace std;
 
-const int WIDTH = 40, HEIGHT = 20;
+const int WIDTH = 55, HEIGHT = 30;
 int highScore = 0;
 
 class SnakeGame {
